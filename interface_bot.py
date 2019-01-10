@@ -3,7 +3,7 @@ import requests
 import time
 import urllib
 from uno_rules import game_manager
-from token import TOKEN
+from bot_token import TOKEN
 
 
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
