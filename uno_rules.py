@@ -50,6 +50,14 @@ class Pile:
                 return pos
         return None
 
+    def empty_pile(self):
+        old_cards = self.cards
+        self.cards=[]
+        return old_cards
+
+    def add_pile_to_top(self, new_cards: list):
+        self.cards += new_cards
+
 
 class UnoGameRoom:
     def fill_deck(self, card_list):
@@ -118,9 +126,17 @@ class UnoGameRoom:
         for turn, player in enumerate(self._players):
             info = {"name":player, "turn":turn}
             if hand_size:
-                info["hand_size"] = self.get_hand_by_player(player)
+                info["hand_size"] = len(self.get_hand_by_player(player))
             players.append(info)
         return players
+
+    def refresh_deck(self):
+        if len(self.deck) <= 2:
+            top = self.discard.draw()
+            cards = self.discard.empty_pile()
+            self.discard.place(top)
+            self.deck.add_pile_to_top(cards)
+            self.deck.shuffle()
 
     def __contains__(self, player):
         try:
@@ -226,17 +242,19 @@ def game_manager(player, text):
                 return_text = ""
                 infos = room.all_player_info(True)
                 for info in infos:
-                    return_text += str(info["name"]) + ", turn order:" + str(info["turn"])
-                    return_text += ", hand size:" + str(info["hand_size"]) + "\n"
+                    return_text += str(info["name"]) + ": turn order: " + str(info["turn"])
+                    return_text += ", hand size: " + str(info["hand_size"]) + "\n"
                 return_text += "turn direction: " + str(room.direction)
+                return_text += "\ntop card: " + room.discard.peek_top()[0]
                 return make_message(return_text)
 
         if player == room.current_player():
             if text[0] == "draw":
                 hand = room.get_hand(turn)
                 hand.place(room.deck.draw())
+                room.refresh_deck()
                 return make_message(player + " drew a card", room.current_player_actions(),
-                                    is_reply=True, instant_del=True)
+                                    is_reply=True, del_post=True, instant_del=True)
 
             elif text[0] == "place":
                 if len(text) < 2 or len(text) > 3:
