@@ -3,9 +3,9 @@ import requests
 import time
 import urllib
 from uno_rules import game_manager
+from token import TOKEN
 
 
-TOKEN = "639986680:AAHcDdwhQmziPQcNOmLgeLi6Wwqqa77WieY"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 ID_COMMAND = "/uno"
 
