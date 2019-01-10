@@ -158,15 +158,15 @@ def make_message(message: str,
             "instant_del": instant_del}
 
 
-game_in_progress = False
-room = None
 colors = ["Red", "Blue", "Green", "Yellow"]
+rooms = {}
 
 
-def game_manager(player, text):
-    global game_in_progress
-    global room
+def game_manager(player, text, chat_id):
     global colors
+    if chat_id not in rooms:
+        rooms[chat_id] = None
+    room = rooms(chat_id)
 
     if len(text) == 0:
         return make_message("List of commands",
@@ -181,7 +181,7 @@ def game_manager(player, text):
                             instant_del=True
                             )
 
-    if not game_in_progress:
+    if room is None:
         if text[0] == "start":
             if len(text) == 2:
                 try:
@@ -189,16 +189,14 @@ def game_manager(player, text):
                 except ValueError:
                     return make_message("Only can start with 1-7 whole ppl", del_post=True, instant_del=True)
                 if 0 < int(text[1]) < 8:
-                    game_in_progress = True
-                    room = UnoGameRoom(1, int(text[1]), uno_card_list)
+                    rooms[chat_id] = UnoGameRoom(1, int(text[1]), uno_card_list)
                     return make_message("Game started")
                 else:
                     return make_message("Only can start with 1-7 whole ppl", del_post=True, instant_del=True)
         return make_message("Please 'start <number of players>' the game first", instant_del=True)
 
     elif text[0] == "end" and player in room:
-        game_in_progress = False
-        room = None
+        rooms[chat_id] = None
         return make_message("Game ended", del_post=True)
 
     elif not room.full_room():
@@ -275,8 +273,7 @@ def game_manager(player, text):
                     if top_card["color"] == placed_color or top_card["num"] == placed_card["num"] or card_type == "wild":
                         room.discard.place(hand.take(card))
                         if len(hand) == 0:
-                            game_in_progress = False
-                            room = None
+                            rooms[chat_id] = None
                             return make_message("Game ended, " + player + " won!")
                         else:
                             room.next_turn()

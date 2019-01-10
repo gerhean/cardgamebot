@@ -51,7 +51,7 @@ def handle_updates(updates):
                     delete_message(chat, del_message_id)
                 to_delete = []
             command = text.split(" ")
-            message = game_manager(player_name, command[1:])
+            message = game_manager(player_name, command[1:], chat)
             reply_to = None
             if message["items"]:
                 reply_markup = build_keyboard(message["items"])
